@@ -1,3 +1,4 @@
+using LibraryMvcApp.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Syncfusion.Licensing;
@@ -30,7 +31,11 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
-
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    await IdentitySeeder.SeedRolesAsync(roleManager);
+}
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

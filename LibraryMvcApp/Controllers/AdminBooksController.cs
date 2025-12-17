@@ -200,11 +200,14 @@ namespace LibraryMvcApp.Controllers
             }
 
             await _context.SaveChangesAsync();
+            int? redirectFolderId = book.FolderId;
+
             return RedirectToAction(
-             "Index",
-             "Folder",
-             new { id = folderId }
-         );
+                "Index",
+                "Folder",
+                new { id = redirectFolderId }
+            );
+
 
         }
 

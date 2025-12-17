@@ -59,15 +59,15 @@ namespace LibraryMvcApp.Controllers
         // =======================================================
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> Create(string name, int? parentId)
+        public async Task<IActionResult> Create(string name, int? parentId, string? allowedRole)
         {
             if (parentId == 0)
                 parentId = null; // root
-
             var folder = new Folder
             {
                 Name = name,
-                ParentFolderId = parentId
+                ParentFolderId = parentId,
+                AllowedRole = string.IsNullOrWhiteSpace(allowedRole) ? null : allowedRole
             };
 
             _context.Folders.Add(folder);
@@ -118,7 +118,7 @@ namespace LibraryMvcApp.Controllers
         // =======================================================
         // 📌 Delete Folder (Recursive)
         // =======================================================
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
@@ -127,13 +127,15 @@ namespace LibraryMvcApp.Controllers
                 .Include(f => f.Books)
                 .FirstOrDefaultAsync(f => f.Id == id);
 
-            if (folder == null) return NotFound();
+            if (folder == null)
+                return NotFound();
+
+            if (!CanEditFolder(folder))
+                return Forbid();
 
             int? parentId = folder.ParentFolderId;
 
-            // حذف كامل شامل لكل ما بداخل الفولدر
-            await DeleteFolderRecursive(folder);
-
+            await DeleteRecursive(folder);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Index", new { id = parentId });
@@ -189,6 +191,30 @@ namespace LibraryMvcApp.Controllers
 
             return PartialView("_SearchResult", vm);
         }
+        // =======================
+        // HELPERS
+        // =======================
+        private bool CanEditFolder(Folder folder)
+        {
+            if (User.IsInRole("Admin"))
+                return true;
 
+            if (folder.AllowedRole == null)
+                return false;
+
+            return User.IsInRole(folder.AllowedRole);
+        }
+
+        private async Task DeleteRecursive(Folder folder)
+        {
+            _context.Books.RemoveRange(folder.Books);
+
+            foreach (var sub in folder.SubFolders.ToList())
+            {
+                await DeleteRecursive(sub);
+            }
+
+            _context.Folders.Remove(folder);
+        }
     }
 }
