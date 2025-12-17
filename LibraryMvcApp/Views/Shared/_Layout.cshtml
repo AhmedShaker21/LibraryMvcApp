@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Library</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" asp-controller="Folder" asp-action="Index">
+                <i class="fas fa-book-open me-2"></i>Library
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Folder" asp-action="Index" asp-route-id="">
+                            <i class="fas fa-books me-1"></i>Books
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+                <ul class="navbar-nav">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="AdminUsers" asp-action="Index">Users Dashboard</a>
+                        </li>
+                        <li class="nav-item mt-2">
+                            <span class="navbar-text me-2 mt-2">
+                                <i class="fas fa-user-shield me-1"></i>Admin
+                            </span>
+                        </li>
+                    }
+
+                    @if (User.IsInRole("Admin"))
+                    {
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Account" asp-action="Logout">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Account" asp-action="Login">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        @RenderBody()
+    </div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/docx-preview/dist/docx-preview.min.js"></script>
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>
+<script>
+    let draggedBookId = null;
+
+    function dragBook(event) {
+        draggedBookId = event.target.dataset.bookId;
+        event.dataTransfer.setData("text/plain", draggedBookId);
+    }
+
+    function dropBook(event) {
+        event.preventDefault();
+
+        const bookId = draggedBookId;
+        const folderId = event.target.dataset.folderId;
+
+        if (!bookId || !folderId) return;
+
+        // تأكيد قبل النقل
+        if (!confirm("Move this book to the selected folder?")) return;
+
+        // AJAX request to server
+        fetch('/Folder/MoveBook', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector("input[name='__RequestVerificationToken']").value
+            },
+            body: JSON.stringify({ bookId: bookId, folderId: folderId })
+        })
+            .then(res => {
+                if (res.ok) {
+                    location.reload();
+                }
+            });
+    }
+</script>

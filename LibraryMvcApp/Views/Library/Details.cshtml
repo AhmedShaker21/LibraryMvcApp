@@ -1,0 +1,42 @@
+﻿@model LibraryMvcApp.Models.Book
+
+<div class="book-details-header">
+    <h2>@Model.Title</h2>
+    <p class="text-muted mb-2">
+        <i class="fas fa-user me-2"></i>@Model.Author
+    </p>
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <p class="mt-3">@Model.Description</p>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(Model.FilePath) && Model.FileType.ToLower() == "pdf")
+{
+    <div class="pdf-container">
+        <embed src="@Model.FilePath" type="application/pdf" width="100%" height="650px" />
+    </div>
+}
+else if (!string.IsNullOrEmpty(Model.FilePath))
+{
+    <div class="book-details-header text-center">
+        <p><i class="fas fa-file me-2"></i>File type: <strong>@Model.FileType</strong></p>
+        <a href="@Model.FilePath" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-external-link-alt me-2"></i>Open file
+        </a>
+    </div>
+}
+else
+{
+    <div class="book-details-header text-center">
+        <p class="text-danger">
+            <i class="fas fa-exclamation-circle me-2"></i>No file uploaded for this book.
+        </p>
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Library
+    </a>
+</div>
