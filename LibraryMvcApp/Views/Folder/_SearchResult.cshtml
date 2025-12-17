@@ -1,0 +1,54 @@
+﻿@model LibraryMvcApp.Models.SearchViewModel
+
+@if (!Model.Folders.Any() && !Model.Books.Any())
+{
+    <p class="text-muted">لا توجد نتائج</p>
+}
+
+@if (Model.Folders.Any())
+{
+    <h5 class="mb-3">📁 Folders</h5>
+    <div class="row g-3">
+        @foreach (var folder in Model.Folders)
+        {
+            <div class="col-md-3">
+                <div class="card p-3">
+                    <i class="fas fa-folder fa-2x text-warning"></i>
+                    <strong>@folder.Name</strong>
+                    <a asp-controller="Folder"
+                       asp-action="Index"
+                       asp-route-id="@folder.Id"
+                       class="btn btn-sm btn-warning mt-2">
+                        Open
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (Model.Books.Any())
+{
+    <h5 class="mt-4 mb-3">📚 Books</h5>
+    <div class="row g-3">
+        @foreach (var book in Model.Books)
+        {
+            <div class="col-md-3">
+                <div class="card book-card">
+                    <img src="@("/images/default-cover.jpg")"
+                         class="card-img-top" />
+                    <div class="card-body">
+                        <h6>@book.Title</h6>
+                        <p class="text-muted small">@book.Description</p>
+                        <a asp-controller="Library"
+                           asp-action="Details"
+                           asp-route-id="@book.Id"
+                           class="btn btn-sm btn-primary">
+                            Read
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

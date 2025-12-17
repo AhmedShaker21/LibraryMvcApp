@@ -158,5 +158,37 @@ namespace LibraryMvcApp.Controllers
             // حذف الفولدر نفسه
             _context.Folders.Remove(folder);
         }
+        [HttpGet]
+        public async Task<IActionResult> Search(string q)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                return PartialView("_SearchResult", new SearchViewModel());
+            }
+
+            q = q.Trim();
+
+            var folders = await _context.Folders
+                .Where(f => f.Name.Contains(q))
+                .OrderBy(f => f.Name)
+                .ToListAsync();
+
+            var books = await _context.Books
+                .Where(b =>
+                    b.Title.Contains(q) ||
+                    b.Description.Contains(q)
+                )
+                .OrderBy(b => b.Title)
+                .ToListAsync();
+
+            var vm = new SearchViewModel
+            {
+                Folders = folders,
+                Books = books
+            };
+
+            return PartialView("_SearchResult", vm);
+        }
+
     }
 }

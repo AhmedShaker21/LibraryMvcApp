@@ -4,6 +4,13 @@
     ViewBag.Title = "Books";
     var folderId = ViewBag.FolderId as int?;
 }
+<a asp-controller="Folder"
+   asp-action="Index"
+   asp-route-id="@ViewBag.FolderId"
+   class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i>
+    Back to Folder
+</a>
 
 <div class="page-header d-flex justify-content-between align-items-center">
     <h2><i class="fas fa-book-reader me-2"></i> Books</h2>

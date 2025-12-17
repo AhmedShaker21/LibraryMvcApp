@@ -118,7 +118,12 @@ namespace LibraryMvcApp.Controllers
 
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "Folder");
+            return RedirectToAction(
+                "Index",
+                "Folder",
+                new { id = folderId }
+            );
+
 
         }
 
@@ -195,7 +200,11 @@ namespace LibraryMvcApp.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "Folder");
+            return RedirectToAction(
+             "Index",
+             "Folder",
+             new { id = folderId }
+         );
 
         }
 
@@ -225,7 +234,11 @@ namespace LibraryMvcApp.Controllers
 
             _context.Books.Remove(book);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "Folder");
+            return RedirectToAction(
+                "Index",
+                "Folder",
+                new { id = folderId }
+            );
 
         }
     }

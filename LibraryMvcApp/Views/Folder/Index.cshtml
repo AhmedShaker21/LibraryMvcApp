@@ -3,9 +3,24 @@
 @{
     ViewBag.Title = "Folders";
 }
+<a asp-controller="Folder"
+   asp-action="Index"
+   asp-route-id="@ViewBag.FolderId"
+   class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i>
+    Back to Folder
+</a>
 
 <!-- PAGE HEADER -->
 <div class="page-header">
+    <input type="text"
+           id="searchBox"
+           class="form-control mb-4"
+           placeholder="🔍 ابحث عن كتاب أو فولدر..." />
+
+    <div id="searchResult">
+        @* النتائج هتظهر هنا *@
+    </div>
 
     <h2>
         <i class="fas fa-folder-open me-2"></i>
@@ -175,3 +190,23 @@
     }
 
 </div>
+<script>
+    const searchBox = document.getElementById("searchBox");
+    const resultDiv = document.getElementById("searchResult");
+
+    let timer = null;
+
+    searchBox.addEventListener("keyup", function () {
+        clearTimeout(timer);
+
+        timer = setTimeout(() => {
+            const q = searchBox.value;
+
+            fetch(`/Folder/Search?q=${encodeURIComponent(q)}`)
+                .then(res => res.text())
+                .then(html => {
+                    resultDiv.innerHTML = html;
+                });
+        }, 300); // debounce
+    });
+</script>
