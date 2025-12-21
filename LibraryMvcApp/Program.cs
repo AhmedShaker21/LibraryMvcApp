@@ -1,4 +1,6 @@
 using LibraryMvcApp.Data;
+using LibraryMvcApp.Services;
+using LibraryMvcApp.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Syncfusion.Licensing;
@@ -8,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IFolderPermissionService, FolderPermissionService>();
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>

@@ -14,7 +14,7 @@ namespace LibraryMvcApp.Controllers.Admin
         private readonly IWebHostEnvironment _env;
         private readonly IFolderPermissionService _permission;
 
-        public AdminBooksController(AppDbContext context, IWebHostEnvironment env, IFolderPermissionService permission)
+        public AdminBooksController(AppDbContext context, IWebHostEnvironment env ,     IFolderPermissionService permission)
         {
             _context = context;
             _env = env;
@@ -29,8 +29,7 @@ namespace LibraryMvcApp.Controllers.Admin
         public async Task<IActionResult> Create(int folderId)
         {
             var folder = await _context.Folders.FindAsync(folderId);
-            if (!_permission.CanManage(folder, User))
-                return Forbid();
+            if (folder == null) return NotFound();
 
             if (!CanManage(folder))
                 return Forbid();

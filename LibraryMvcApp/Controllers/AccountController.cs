@@ -4,12 +4,12 @@ using LibraryMvcApp.Models;
 
 namespace LibraryMvcApp.Controllers
 {
-    public class FolderController : Controller
+    public class AccountController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
 
-        public FolderController(UserManager<IdentityUser> userManager,
+        public AccountController(UserManager<IdentityUser> userManager,
                                  SignInManager<IdentityUser> signInManager)
         {
             _userManager = userManager;

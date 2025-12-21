@@ -40,7 +40,6 @@
 
                 <!-- RIGHT SIDE -->
                 <ul class="navbar-nav align-items-center">
-
                     @if (User.Identity != null && User.Identity.IsAuthenticated)
                     {
                         @if (User.IsInRole("Admin"))
@@ -82,7 +81,6 @@
                             </a>
                         </li>
                     }
-
                 </ul>
             </div>
         </div>
