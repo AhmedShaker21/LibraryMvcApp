@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LibraryMvcApp.Controllers.Admin
 {
+    [Authorize]
     public class FolderController : Controller
     {
         private readonly AppDbContext _context;
@@ -16,39 +17,42 @@ namespace LibraryMvcApp.Controllers.Admin
         }
 
         // =======================================================
-        // 📌 عرض فولدر + فولدرات فرعية + كتب + Breadcrumb
+        // 📌 Index (Root / Folder)
         // =======================================================
+        [HttpGet]
         public async Task<IActionResult> Index(int? id)
         {
             Folder folder;
 
             if (id == null || id == 0)
             {
-                // 📁 Root (الفولدر الأساسي)
+                // ROOT
                 folder = new Folder
                 {
                     Id = 0,
                     Name = "Main",
                     SubFolders = await _context.Folders
                         .Where(f => f.ParentFolderId == null)
+                        .OrderBy(f => f.Name)
                         .ToListAsync(),
                     Books = await _context.Books
                         .Where(b => b.FolderId == null)
+                        .OrderBy(b => b.Title)
                         .ToListAsync()
                 };
 
-                ViewBag.Breadcrumb = new List<Folder>();  // root has no parents
+                ViewBag.Breadcrumb = new List<Folder>();
             }
             else
             {
                 folder = await _context.Folders
                     .Include(f => f.SubFolders)
                     .Include(f => f.Books)
-                    .FirstOrDefaultAsync(f => f.Id == id);
+                    .FirstOrDefaultAsync(f => f.Id == id.Value);
 
-                if (folder == null) return NotFound();
+                if (folder == null)
+                    return NotFound();
 
-                // تحميل الـ Breadcrumb
                 ViewBag.Breadcrumb = await GetBreadcrumbPath(id.Value);
             }
 
@@ -56,29 +60,135 @@ namespace LibraryMvcApp.Controllers.Admin
         }
 
         // =======================================================
-        // 📌 إنشاء فولدر
+        // 📌 Create Folder
         // =======================================================
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> Create(string name, int? parentId, string? allowedRole)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(
+            string name,
+            int? parentId,
+            string? allowedRole)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                return RedirectToAction(nameof(Index), new { id = parentId });
+
             if (parentId == 0)
-                parentId = null; // root
+                parentId = null;
+
             var folder = new Folder
             {
-                Name = name,
+                Name = name.Trim(),
                 ParentFolderId = parentId,
-                AllowedRole = string.IsNullOrWhiteSpace(allowedRole) ? null : allowedRole
+                AllowedRole = string.IsNullOrWhiteSpace(allowedRole)
+                    ? null
+                    : allowedRole.Trim()
             };
 
             _context.Folders.Add(folder);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index", new { id = parentId });
+            return RedirectToAction(nameof(Index), new { id = parentId });
         }
 
         // =======================================================
-        // 📌 Breadcrumb Path
+        // 📌 Rename Folder
+        // =======================================================
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Rename(int id, string newName)
+        {
+            if (string.IsNullOrWhiteSpace(newName))
+                return RedirectToAction(nameof(Index));
+
+            var folder = await _context.Folders.FindAsync(id);
+            if (folder == null)
+                return NotFound();
+
+            folder.Name = newName.Trim();
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index), new { id = folder.ParentFolderId });
+        }
+
+        // =======================================================
+        // 📌 Delete Folder (Recursive)
+        // =======================================================
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var folder = await _context.Folders
+                .Include(f => f.SubFolders)
+                .Include(f => f.Books)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (folder == null)
+                return NotFound();
+
+            int? parentId = folder.ParentFolderId;
+
+            await DeleteRecursive(folder);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index), new { id = parentId });
+        }
+
+        // =======================================================
+        // 📌 Recursive Delete Helper
+        // =======================================================
+        private async Task DeleteRecursive(Folder folder)
+        {
+            // حذف الكتب
+            _context.Books.RemoveRange(folder.Books);
+
+            // حذف الفولدرات الفرعية
+            foreach (var sub in folder.SubFolders.ToList())
+            {
+                var child = await _context.Folders
+                    .Include(f => f.SubFolders)
+                    .Include(f => f.Books)
+                    .FirstAsync(f => f.Id == sub.Id);
+
+                await DeleteRecursive(child);
+            }
+
+            _context.Folders.Remove(folder);
+        }
+
+        // =======================================================
+        // 📌 Search (Folders + Books)
+        // =======================================================
+        [HttpGet]
+        public async Task<IActionResult> Search(string q)
+        {
+            var vm = new SearchViewModel();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.Trim();
+
+                vm.Folders = await _context.Folders
+                    .Where(f => f.Name.Contains(q))
+                    .OrderBy(f => f.Name)
+                    .ToListAsync();
+
+                vm.Books = await _context.Books
+                    .Where(b =>
+                        b.Title.Contains(q) ||
+                        (b.Description != null && b.Description.Contains(q))
+                    )
+                    .OrderBy(b => b.Title)
+                    .ToListAsync();
+            }
+
+            return PartialView("_SearchResult", vm);
+        }
+
+        // =======================================================
+        // 📌 Breadcrumb Helper
         // =======================================================
         private async Task<List<Folder>> GetBreadcrumbPath(int folderId)
         {
@@ -92,130 +202,11 @@ namespace LibraryMvcApp.Controllers.Admin
                 if (current.ParentFolderId == null)
                     break;
 
-                current = await _context.Folders
-                    .FirstOrDefaultAsync(f => f.Id == current.ParentFolderId);
+                current = await _context.Folders.FindAsync(current.ParentFolderId);
             }
 
             path.Reverse();
             return path;
-        }
-
-        // =======================================================
-        // 📌 Rename Folder
-        // =======================================================
-        [Authorize(Roles = "Admin")]
-        [HttpPost]
-        public async Task<IActionResult> Rename(int id, string newName)
-        {
-            var folder = await _context.Folders.FindAsync(id);
-            if (folder == null) return NotFound();
-
-            folder.Name = newName;
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index", new { id = folder.ParentFolderId });
-        }
-
-        // =======================================================
-        // 📌 Delete Folder (Recursive)
-        // =======================================================
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var folder = await _context.Folders
-                .Include(f => f.SubFolders)
-                .Include(f => f.Books)
-                .FirstOrDefaultAsync(f => f.Id == id);
-
-            if (folder == null)
-                return NotFound();
-
-            if (!CanEditFolder(folder))
-                return Forbid();
-
-            int? parentId = folder.ParentFolderId;
-
-            await DeleteRecursive(folder);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index", new { id = parentId });
-        }
-
-        private async Task DeleteFolderRecursive(Folder folder)
-        {
-            // حذف الكتب داخل الفولدر
-            _context.Books.RemoveRange(folder.Books);
-
-            // حذف الفولدرات الفرعية بشكل Recursively
-            foreach (var sub in folder.SubFolders.ToList())
-            {
-                var child = await _context.Folders
-                    .Include(f => f.SubFolders)
-                    .Include(f => f.Books)
-                    .FirstAsync(f => f.Id == sub.Id);
-
-                await DeleteFolderRecursive(child);
-            }
-
-            // حذف الفولدر نفسه
-            _context.Folders.Remove(folder);
-        }
-        [HttpGet]
-        public async Task<IActionResult> Search(string q)
-        {
-            if (string.IsNullOrWhiteSpace(q))
-            {
-                return PartialView("_SearchResult", new SearchViewModel());
-            }
-
-            q = q.Trim();
-
-            var folders = await _context.Folders
-                .Where(f => f.Name.Contains(q))
-                .OrderBy(f => f.Name)
-                .ToListAsync();
-
-            var books = await _context.Books
-                .Where(b =>
-                    b.Title.Contains(q) ||
-                    b.Description.Contains(q)
-                )
-                .OrderBy(b => b.Title)
-                .ToListAsync();
-
-            var vm = new SearchViewModel
-            {
-                Folders = folders,
-                Books = books
-            };
-
-            return PartialView("_SearchResult", vm);
-        }
-        // =======================
-        // HELPERS
-        // =======================
-        private bool CanEditFolder(Folder folder)
-        {
-            if (User.IsInRole("Admin"))
-                return true;
-
-            if (folder.AllowedRole == null)
-                return false;
-
-            return User.IsInRole(folder.AllowedRole);
-        }
-
-        private async Task DeleteRecursive(Folder folder)
-        {
-            _context.Books.RemoveRange(folder.Books);
-
-            foreach (var sub in folder.SubFolders.ToList())
-            {
-                await DeleteRecursive(sub);
-            }
-
-            _context.Folders.Remove(folder);
         }
     }
 }

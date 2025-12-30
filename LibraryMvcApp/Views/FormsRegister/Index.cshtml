@@ -1,0 +1,52 @@
+﻿@model List<FormEntry>
+<h2>حصر النماذج – إدارة @ViewBag.DepartmentNo</h2>
+
+
+<p>
+    آخر رقم نموذج:
+    <b>@ViewBag.LastFormNumber</b>
+</p>
+<p class="text-warning">Rows: @Model.Count</p>
+
+<!-- ✅ هنا الزرار -->
+<a class="btn btn-success mb-3"
+   asp-action="Create"
+   asp-route-departmentId="@ViewBag.DepartmentId">
+    إضافة نموذج
+</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>رقم النموذج</th>
+            <th>اسم الإجراء</th>
+            <th>اسم النموذج</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var i = 1;
+        }
+        @foreach (var x in Model)
+        {
+            <tr>
+                <td>@i</td>
+                <td>@x.FullNumber</td>
+                <td>@x.ProcedureName</td>
+                <td>@x.FormName</td>
+                <td>
+                    <form asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@x.Id" />
+                        <input type="hidden" name="departmentId" value="@ViewBag.DepartmentId" />
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            i++;
+        }
+    </tbody>
+
+</table>

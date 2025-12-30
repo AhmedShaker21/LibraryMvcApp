@@ -1,5 +1,6 @@
 using LibraryMvcApp.Data;
 using LibraryMvcApp.Services;
+using LibraryMvcApp.Services.Implementations;
 using LibraryMvcApp.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IFolderPermissionService, FolderPermissionService>();
+builder.Services.AddScoped<IFormRegisterService, FormRegisterService>();
+builder.Services.AddScoped<IPdfFormExtractor, PdfFormExtractor>();
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>

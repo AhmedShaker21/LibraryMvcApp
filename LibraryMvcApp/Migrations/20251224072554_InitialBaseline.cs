@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace LibraryMvcApp.Migrations
 {
     /// <inheritdoc />
-    public partial class Library02 : Migration
+    public partial class InitialBaseline : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,6 +50,41 @@ namespace LibraryMvcApp.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Departments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Code = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartFormNumber = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Departments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Folders",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ParentFolderId = table.Column<int>(type: "int", nullable: true),
+                    AllowedRole = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Folders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Folders_Folders_ParentFolderId",
+                        column: x => x.ParentFolderId,
+                        principalTable: "Folders",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -156,6 +193,67 @@ namespace LibraryMvcApp.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "FormEntries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DepartmentNo = table.Column<int>(type: "int", nullable: false),
+                    SerialNo = table.Column<int>(type: "int", nullable: false),
+                    FormNumber = table.Column<int>(type: "int", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    FullNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ProcedureName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    ProcedureCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    FormName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FormEntries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FormEntries_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Books",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Author = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CoverImagePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FolderId = table.Column<int>(type: "int", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Books", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Books_Folders_FolderId",
+                        column: x => x.FolderId,
+                        principalTable: "Folders",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.InsertData(
+                table: "Departments",
+                columns: new[] { "Id", "Code", "Name", "StartFormNumber" },
+                values: new object[,]
+                {
+                    { 1, 53, "إدارة الجودة", 200 },
+                    { 2, 50, "إدارة السلامة", 200 }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -194,6 +292,27 @@ namespace LibraryMvcApp.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Books_FolderId",
+                table: "Books",
+                column: "FolderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Departments_Code",
+                table: "Departments",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Folders_ParentFolderId",
+                table: "Folders",
+                column: "ParentFolderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FormEntries_DepartmentId",
+                table: "FormEntries",
+                column: "DepartmentId");
         }
 
         /// <inheritdoc />
@@ -215,10 +334,22 @@ namespace LibraryMvcApp.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Books");
+
+            migrationBuilder.DropTable(
+                name: "FormEntries");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Folders");
+
+            migrationBuilder.DropTable(
+                name: "Departments");
         }
     }
 }

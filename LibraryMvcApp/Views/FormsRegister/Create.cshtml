@@ -1,0 +1,63 @@
+﻿@using LibraryMvcApp.ViewModels
+@model CreateFormVm
+
+<h2>إضافة نموذج</h2>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">الإدارة</label>
+        <select asp-for="DepartmentId" class="form-control">
+            <option value="">-- اختر الإدارة --</option>
+            @foreach (var d in Model.Departments)
+            {
+                <option value="@d.Id">
+                    @d.Code - @d.Name
+                </option>
+            }
+        </select>
+
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">رقم النموذج</label>
+        <input class="form-control"
+               id="formNumber"
+               readonly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">اسم الإجراءات</label>
+        <input asp-for="ProcedureName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">رقم الإجراءات</label>
+        <input asp-for="ProcedureCode" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">اسم النموذج</label>
+        <input asp-for="FormName" class="form-control" />
+    </div>
+
+    <button class="btn btn-success">حفظ</button>
+</form>
+
+@section Scripts {
+    <script>
+        document.getElementById("deptSelect").addEventListener("change", function () {
+            const deptNo = this.value;
+            if (!deptNo) return;
+
+            fetch(`/Admin/FormsRegister?departmentNo=${deptNo}`)
+                .then(r => r.text())
+                .then(() => {
+                    // الرقم الحقيقي بيتحسب في السيرفيس
+                    document.getElementById("formNumber").value =
+                        "سيتم توليده تلقائياً";
+                });
+        });
+    </script>
+}

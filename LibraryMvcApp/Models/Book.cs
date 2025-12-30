@@ -12,6 +12,7 @@ namespace LibraryMvcApp.Models
         public string? Author { get; set; }
 
         // File paths
+
         public string FilePath { get; set; } = string.Empty;
         public string CoverImagePath { get; set; } = string.Empty;
 

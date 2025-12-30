@@ -3,7 +3,6 @@ using LibraryMvcApp.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security;
 
 namespace LibraryMvcApp.Controllers.Admin
 {
@@ -12,14 +11,11 @@ namespace LibraryMvcApp.Controllers.Admin
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
-        private readonly IFolderPermissionService _permission;
 
-        public AdminBooksController(AppDbContext context, IWebHostEnvironment env ,     IFolderPermissionService permission)
+        public AdminBooksController( AppDbContext context,IWebHostEnvironment env)
         {
             _context = context;
             _env = env;
-            _permission = permission;
-
         }
 
         // ============================================================
@@ -30,9 +26,6 @@ namespace LibraryMvcApp.Controllers.Admin
         {
             var folder = await _context.Folders.FindAsync(folderId);
             if (folder == null) return NotFound();
-
-            if (!CanManage(folder))
-                return Forbid();
 
             ViewBag.FolderId = folderId;
             return View();
@@ -54,8 +47,7 @@ namespace LibraryMvcApp.Controllers.Admin
             var folder = await _context.Folders.FindAsync(folderId);
             if (folder == null) return NotFound();
 
-            if (!CanManage(folder))
-                return Forbid();
+        
 
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -72,36 +64,8 @@ namespace LibraryMvcApp.Controllers.Admin
                 FolderId = folderId
             };
 
-            // ---------- FILE ----------
-            if (file != null && file.Length > 0)
-            {
-                var uploads = Path.Combine(_env.WebRootPath, "uploads", "books");
-                Directory.CreateDirectory(uploads);
-
-                var name = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                var path = Path.Combine(uploads, name);
-
-                using var stream = new FileStream(path, FileMode.Create);
-                await file.CopyToAsync(stream);
-
-                book.FilePath = $"/uploads/books/{name}";
-                book.FileType = Path.GetExtension(file.FileName).TrimStart('.');
-            }
-
-            // ---------- COVER ----------
-            if (coverImage != null && coverImage.Length > 0)
-            {
-                var uploads = Path.Combine(_env.WebRootPath, "uploads", "covers");
-                Directory.CreateDirectory(uploads);
-
-                var name = Guid.NewGuid() + Path.GetExtension(coverImage.FileName);
-                var path = Path.Combine(uploads, name);
-
-                using var stream = new FileStream(path, FileMode.Create);
-                await coverImage.CopyToAsync(stream);
-
-                book.CoverImagePath = $"/uploads/covers/{name}";
-            }
+            await UploadBookFile(book, file);
+            await UploadCover(book, coverImage);
 
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
@@ -110,7 +74,7 @@ namespace LibraryMvcApp.Controllers.Admin
         }
 
         // ============================================================
-        // GET: Edit
+        // GET: Edit Book
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
@@ -120,14 +84,13 @@ namespace LibraryMvcApp.Controllers.Admin
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (book == null) return NotFound();
-            if (!CanManage(book.Folder)) return Forbid();
 
             ViewBag.FolderId = book.FolderId;
             return View(book);
         }
 
         // ============================================================
-        // POST: Edit
+        // POST: Edit Book
         // ============================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -145,49 +108,28 @@ namespace LibraryMvcApp.Controllers.Admin
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (book == null) return NotFound();
-            if (!CanManage(book.Folder)) return Forbid();
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                ModelState.AddModelError("", "Title is required");
+                ViewBag.FolderId = folderId;
+                return View(book);
+            }
 
             book.Title = title;
             book.Description = description;
             book.Author = author;
 
-            // FILE
-            if (file != null && file.Length > 0)
-            {
-                var uploads = Path.Combine(_env.WebRootPath, "uploads", "books");
-                Directory.CreateDirectory(uploads);
-
-                var name = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                var path = Path.Combine(uploads, name);
-
-                using var stream = new FileStream(path, FileMode.Create);
-                await file.CopyToAsync(stream);
-
-                book.FilePath = $"/uploads/books/{name}";
-                book.FileType = Path.GetExtension(file.FileName).TrimStart('.');
-            }
-
-            // COVER
-            if (coverImage != null && coverImage.Length > 0)
-            {
-                var uploads = Path.Combine(_env.WebRootPath, "uploads", "covers");
-                Directory.CreateDirectory(uploads);
-
-                var name = Guid.NewGuid() + Path.GetExtension(coverImage.FileName);
-                var path = Path.Combine(uploads, name);
-
-                using var stream = new FileStream(path, FileMode.Create);
-                await coverImage.CopyToAsync(stream);
-
-                book.CoverImagePath = $"/uploads/covers/{name}";
-            }
+            await UploadBookFile(book, file);
+            await UploadCover(book, coverImage);
 
             await _context.SaveChangesAsync();
+
             return RedirectToAction("Index", "Folder", new { id = book.FolderId });
         }
 
         // ============================================================
-        // POST: Delete
+        // POST: Delete Book
         // ============================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -198,8 +140,6 @@ namespace LibraryMvcApp.Controllers.Admin
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (book == null) return NotFound();
-            if (!CanManage(book.Folder)) return Forbid();
-
             _context.Books.Remove(book);
             await _context.SaveChangesAsync();
 
@@ -207,20 +147,39 @@ namespace LibraryMvcApp.Controllers.Admin
         }
 
         // ============================================================
-        // HELPER: Permission
+        // PRIVATE HELPERS
         // ============================================================
-        private bool CanManage(Folder? folder)
+        private async Task UploadBookFile(Book book, IFormFile? file)
         {
-            if (User.IsInRole("Admin"))
-                return true;
+            if (file == null || file.Length == 0) return;
 
-            if (folder == null)
-                return false;
+            var uploads = Path.Combine(_env.WebRootPath, "uploads", "books");
+            Directory.CreateDirectory(uploads);
 
-            if (string.IsNullOrEmpty(folder.AllowedRole))
-                return false;
+            var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine(uploads, fileName);
 
-            return User.IsInRole(folder.AllowedRole);
+            using var stream = new FileStream(filePath, FileMode.Create);
+            await file.CopyToAsync(stream);
+
+            book.FilePath = $"/uploads/books/{fileName}";
+            book.FileType = Path.GetExtension(file.FileName).TrimStart('.');
+        }
+
+        private async Task UploadCover(Book book, IFormFile? coverImage)
+        {
+            if (coverImage == null || coverImage.Length == 0) return;
+
+            var uploads = Path.Combine(_env.WebRootPath, "uploads", "covers");
+            Directory.CreateDirectory(uploads);
+
+            var fileName = Guid.NewGuid() + Path.GetExtension(coverImage.FileName);
+            var filePath = Path.Combine(uploads, fileName);
+
+            using var stream = new FileStream(filePath, FileMode.Create);
+            await coverImage.CopyToAsync(stream);
+
+            book.CoverImagePath = $"/uploads/covers/{fileName}";
         }
     }
 }

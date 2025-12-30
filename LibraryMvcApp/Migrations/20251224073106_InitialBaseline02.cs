@@ -5,7 +5,7 @@
 namespace LibraryMvcApp.Migrations
 {
     /// <inheritdoc />
-    public partial class update : Migration
+    public partial class InitialBaseline02 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

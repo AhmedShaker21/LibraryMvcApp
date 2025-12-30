@@ -64,6 +64,48 @@ namespace LibraryMvcApp.Migrations
                     b.ToTable("Books");
                 });
 
+            modelBuilder.Entity("LibraryMvcApp.Models.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Code")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StartFormNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Departments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = 53,
+                            Name = "إدارة الجودة",
+                            StartFormNumber = 200
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = 50,
+                            Name = "إدارة السلامة",
+                            StartFormNumber = 200
+                        });
+                });
+
             modelBuilder.Entity("LibraryMvcApp.Models.Folder", b =>
                 {
                     b.Property<int>("Id")
@@ -87,6 +129,49 @@ namespace LibraryMvcApp.Migrations
                     b.HasIndex("ParentFolderId");
 
                     b.ToTable("Folders");
+                });
+
+            modelBuilder.Entity("LibraryMvcApp.Models.FormEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DepartmentNo")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FormName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FormNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FullNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProcedureCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProcedureName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("FormEntries");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -305,6 +390,17 @@ namespace LibraryMvcApp.Migrations
                     b.Navigation("ParentFolder");
                 });
 
+            modelBuilder.Entity("LibraryMvcApp.Models.FormEntry", b =>
+                {
+                    b.HasOne("LibraryMvcApp.Models.Department", "Department")
+                        .WithMany("FormEntries")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -354,6 +450,11 @@ namespace LibraryMvcApp.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LibraryMvcApp.Models.Department", b =>
+                {
+                    b.Navigation("FormEntries");
                 });
 
             modelBuilder.Entity("LibraryMvcApp.Models.Folder", b =>

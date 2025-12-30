@@ -1,0 +1,25 @@
+﻿@model List<FormEntry>
+
+<h2>كل النماذج</h2>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>الإدارة</th>
+            <th>رقم النموذج</th>
+            <th>اسم الإجراء</th>
+            <th>اسم النموذج</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var x in Model)
+        {
+            <tr>
+                <td>@x.Department.Code</td>
+                <td><b>@x.FullNumber</b></td>
+                <td>@x.ProcedureName</td>
+                <td>@x.FormName</td>
+            </tr>
+        }
+    </tbody>
+</table>

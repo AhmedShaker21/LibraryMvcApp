@@ -1,0 +1,31 @@
+﻿@model List<dynamic>
+
+<h2>الإدارات</h2>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>رقم الإدارة</th>
+            <th>آخر رقم نموذج</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Department.Code</td>
+                <td><b>@item.LastFormNumber</b></td>
+                <td>
+                    <!-- زرار الدخول على النماذج -->
+                    <a class="btn btn-primary btn-sm"
+                       asp-controller="FormsRegister"
+                       asp-action="Index"
+                       asp-route-departmentId="@item.Department.Id">
+                        عرض النماذج
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
