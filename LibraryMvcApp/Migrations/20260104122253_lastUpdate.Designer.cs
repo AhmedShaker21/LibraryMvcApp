@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryMvcApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260104122253_lastUpdate")]
+    partial class lastUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,27 +106,6 @@ namespace LibraryMvcApp.Migrations
                             Code = 50,
                             Name = "إدارة السلامة",
                             StartFormNumber = 200
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = 73,
-                            Name = "تأهيل وتدريب العاملين",
-                            StartFormNumber = 200
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = 74,
-                            Name = "الإدارة الطبية",
-                            StartFormNumber = 200
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = 81,
-                            Name = "إدارة المشتريات",
-                            StartFormNumber = 200
                         });
                 });
 
@@ -193,128 +175,6 @@ namespace LibraryMvcApp.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("FormEntries");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 1,
-                            DepartmentNo = 53,
-                            FormName = "خريطة تحليل الأنشطة والعمليات",
-                            FormNumber = 230,
-                            FullNumber = "ن / 53 / 230",
-                            ProcedureCode = "ACFE/HS P 53-01",
-                            ProcedureName = "تحديد وتقييم مظاهر التأثير البيئي والسلامة"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 1,
-                            DepartmentNo = 53,
-                            FormName = "جدول الحصر العام لمصادر التأثير البيئى",
-                            FormNumber = 231,
-                            FullNumber = "ن / 53 / 231",
-                            ProcedureCode = "ACFE/HS P 53-01",
-                            ProcedureName = "تحديد وتقييم مظاهر التأثير البيئي والسلامة"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 1,
-                            DepartmentNo = 53,
-                            FormName = "جدول تقييم العناصر البيئية",
-                            FormNumber = 232,
-                            FullNumber = "ن / 53 / 232",
-                            ProcedureCode = "ACFE/HS P 53-01",
-                            ProcedureName = "تحديد وتقييم مظاهر التأثير البيئي والسلامة"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 1,
-                            DepartmentNo = 53,
-                            FormName = "جدول الحصر العام للمصادر الهامة",
-                            FormNumber = 233,
-                            FullNumber = "ن / 53 / 233",
-                            ProcedureCode = "ACFE/HS P 53-01",
-                            ProcedureName = "تحديد وتقييم مظاهر التأثير البيئي والسلامة"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 1,
-                            DepartmentNo = 53,
-                            FormName = "تحديد مخاطر العمل بالموقع",
-                            FormNumber = 240,
-                            FullNumber = "ن / 53 / 240",
-                            ProcedureCode = "ACFE/HSP-53-06",
-                            ProcedureName = "أسلوب مواجهة حالات الطوارئ"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 3,
-                            DepartmentNo = 73,
-                            FormName = "حصر أسماء العاملين فى العمليات الخاصة",
-                            FormNumber = 239,
-                            FullNumber = "ن / 73 / 239",
-                            ProcedureCode = "ACFQ/E/HS P 73-02",
-                            ProcedureName = "تأهيل وتدريب العاملين بالعمليات الخاصة"
-                        },
-                        new
-                        {
-                            Id = 30,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 4,
-                            DepartmentNo = 74,
-                            FormName = "طلب توقيع كشف طبى",
-                            FormNumber = 200,
-                            FullNumber = "ن / 74 / 200",
-                            ProcedureCode = "ACFQ/E/HSP 74-01",
-                            ProcedureName = "الإدارة الطبية"
-                        },
-                        new
-                        {
-                            Id = 31,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 4,
-                            DepartmentNo = 74,
-                            FormName = "نموذج تحويل للمستشفى",
-                            FormNumber = 201,
-                            FullNumber = "ن / 74 / 201",
-                            ProcedureCode = "ACFQ/E/HSP 74-01",
-                            ProcedureName = "الإدارة الطبية"
-                        },
-                        new
-                        {
-                            Id = 40,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 5,
-                            DepartmentNo = 81,
-                            FormName = "طلب الشراء",
-                            FormNumber = 254,
-                            FullNumber = "ن / 81 / 254",
-                            ProcedureCode = "ACFQP 81-02",
-                            ProcedureName = "إجراء عمليات الشراء"
-                        },
-                        new
-                        {
-                            Id = 41,
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 5,
-                            DepartmentNo = 81,
-                            FormName = "سجل الموردين المعتمدين",
-                            FormNumber = 242,
-                            FullNumber = "ن / 81 / 242",
-                            ProcedureCode = "ACFQP 81-03",
-                            ProcedureName = "تقييم الموردين"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

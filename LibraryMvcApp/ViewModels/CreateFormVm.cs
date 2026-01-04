@@ -6,7 +6,8 @@ namespace LibraryMvcApp.ViewModels
     public class CreateFormVm
     {
 
-        public int DepartmentId { get; set; }
+        public int? DepartmentId { get; set; }
+        public int DepartmentCode { get; set; }
 
         [Required]
         public int DepartmentNo { get; set; }  

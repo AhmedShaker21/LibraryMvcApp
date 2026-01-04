@@ -1,6 +1,5 @@
 ﻿using LibraryMvcApp.Models;
 using LibraryMvcApp.Services.Interfaces;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryMvcApp.Services.Implementations
@@ -17,18 +16,20 @@ namespace LibraryMvcApp.Services.Implementations
         public async Task AddFormAsync(FormEntry entry)
         {
             var department = await _context.Departments
-                .SingleAsync(d => d.Id == entry.DepartmentId);
+                .SingleOrDefaultAsync(d => d.Id == entry.DepartmentId);
+
+            if (department == null)
+                throw new Exception("Department not found");
 
             entry.DepartmentNo = department.Code;
 
-            int lastFormNumber = await _context.FormEntries
+            var lastFormNumber = await _context.FormEntries
                 .Where(x => x.DepartmentId == department.Id)
                 .Select(x => (int?)x.FormNumber)
                 .MaxAsync()
                 ?? department.StartFormNumber;
 
             entry.FormNumber = lastFormNumber + 1;
-
             entry.FullNumber = $"ن / {entry.DepartmentNo} / {entry.FormNumber}";
             entry.CreatedAt = DateTime.Now;
 
@@ -36,9 +37,6 @@ namespace LibraryMvcApp.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        // =========================
-        // GET BY DEPARTMENT
-        // =========================
         public async Task<List<FormEntry>> GetByDepartmentAsync(int departmentNo)
         {
             return await _context.FormEntries
@@ -46,28 +44,22 @@ namespace LibraryMvcApp.Services.Implementations
                 .OrderBy(x => x.FormNumber)
                 .ToListAsync();
         }
-
-        // =========================
-        // GET ALL
-        // =========================
         public async Task<List<FormEntry>> GetAllAsync()
         {
             return await _context.FormEntries
-                .OrderBy(x => x.DepartmentNo)
-                .ThenBy(x => x.FormNumber)
+                .Include(x => x.Department)
+                .OrderByDescending(x => x.FormNumber) // 👈 DESC
                 .ToListAsync();
         }
 
-        // =========================
-        // LAST FORM NUMBER (KEY PART)
-        // =========================
+
         public async Task<int> GetLastFormNumberAsync(int departmentNo)
         {
             var department = await _context.Departments
                 .FirstOrDefaultAsync(d => d.Code == departmentNo);
 
-            if (department == null || department.StartFormNumber == null)
-                throw new Exception("Department not found or StartFormNumber not set");
+            if (department == null)
+                throw new Exception("Department not found");
 
             var lastFormNumber = await _context.FormEntries
                 .Where(f => f.DepartmentId == department.Id)
@@ -80,26 +72,11 @@ namespace LibraryMvcApp.Services.Implementations
         public async Task DeleteAsync(int id)
         {
             var entry = await _context.FormEntries.FindAsync(id);
-            if (entry == null) return;
+            if (entry == null)
+                throw new Exception("Form entry not found");
 
             _context.FormEntries.Remove(entry);
             await _context.SaveChangesAsync();
         }
-
-
-        public async Task<Dictionary<int, int>> GetLastNumbersPerDepartmentAsync()
-        {
-            return await _context.FormEntries
-                .GroupBy(x => x.DepartmentNo)
-                .Select(g => new
-                {
-                    Department = g.Key,
-                    LastNumber = g.Max(x => x.FormNumber)
-                })
-                .ToDictionaryAsync(x => x.Department, x => x.LastNumber);
-        }
-     
-
     }
-
 }

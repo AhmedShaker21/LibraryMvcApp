@@ -1,0 +1,27 @@
+﻿@model LibraryMvcApp.ViewModels.ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-danger text-white text-center">
+                    <h4>⚠ Oops!</h4>
+                </div>
+
+                <div class="card-body text-center">
+                    <p class="fs-5 text-muted">@Model.Message</p>
+                    <a href="@Model.ReturnUrl" class="btn btn-primary mt-3">
+                        ⬅ Back to Home
+                    </a>
+                </div>
+
+                <div class="card-footer text-center text-muted small">
+                    Please contact support if the problem persists.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

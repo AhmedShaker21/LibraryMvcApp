@@ -1,25 +1,659 @@
-﻿@model List<FormEntry>
+﻿@model List<LibraryMvcApp.Models.FormEntry>
 
-<h2>كل النماذج</h2>
+@{
+    ViewData["Title"] = "كل النماذج";
+}
 
-<table class="table table-bordered mt-3">
-    <thead>
-        <tr>
-            <th>الإدارة</th>
-            <th>رقم النموذج</th>
-            <th>اسم الإجراء</th>
-            <th>اسم النموذج</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var x in Model)
-        {
-            <tr>
-                <td>@x.Department.Code</td>
-                <td><b>@x.FullNumber</b></td>
-                <td>@x.ProcedureName</td>
-                <td>@x.FormName</td>
-            </tr>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-    </tbody>
-</table>
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            animation: slideDown 0.6s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .page-header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+                animation: rotate 20s linear infinite;
+            }
+
+        @@keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-header h2 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+            .page-header h2 i {
+                font-size: 2.8rem;
+                animation: pulse 2s ease-in-out infinite;
+            }
+
+        @@keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Filter Card */
+        .filter-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: none;
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-label {
+            color: #4a5568;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .filter-label::before {
+                content: '📋';
+                font-size: 1.2rem;
+            }
+
+        .filter-input {
+            width: 100%;
+            padding: 0.875rem 1.125rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f7fafc;
+        }
+
+            .filter-input:focus {
+                outline: none;
+                border-color: #667eea;
+                background: white;
+                box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+                transform: translateY(-2px);
+            }
+
+        .btn-filter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+            .btn-filter:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+            }
+
+            .btn-filter:active {
+                transform: translateY(-1px);
+            }
+
+            .btn-filter i {
+                font-size: 1.2rem;
+                transition: transform 0.3s ease;
+            }
+
+            .btn-filter:hover i {
+                transform: scale(1.2) rotate(90deg);
+            }
+
+        /* Table Card */
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out 0.4s backwards;
+        }
+
+        .table-responsive {
+            border-radius: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+            thead th {
+                color: white;
+                font-weight: 700;
+                padding: 1.25rem 1rem;
+                text-align: center;
+                font-size: 1rem;
+                border: none;
+                white-space: nowrap;
+            }
+
+                thead th:first-child {
+                    border-top-right-radius: 0;
+                }
+
+                thead th:last-child {
+                    border-top-left-radius: 0;
+                }
+
+        tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+            tbody tr:hover {
+                background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+                transform: scale(1.01);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+
+        tbody td {
+            padding: 1.25rem 1rem;
+            color: #2d3748;
+            border: none;
+            vertical-align: middle;
+        }
+
+        .dept-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-number-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(56, 239, 125, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #a0aec0;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            font-size: 0.9rem;
+            margin: 0 0.25rem;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(56, 239, 125, 0.3);
+        }
+
+            .btn-add:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(56, 239, 125, 0.5);
+            }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+        }
+
+            .btn-delete:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(245, 87, 108, 0.5);
+            }
+
+        .action-btn i {
+            font-size: 1rem;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+            .loading-overlay.active {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.2s linear infinite;
+        }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .page-header h2 {
+                font-size: 1.8rem;
+            }
+
+                .page-header h2 i {
+                    font-size: 2rem;
+                }
+
+            .filter-card {
+                padding: 1.5rem;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            thead th, tbody td {
+                padding: 0.875rem 0.5rem;
+            }
+
+            .action-btn {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Form inline */
+        form {
+            display: inline;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filter-col {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .filter-col-btn {
+            min-width: 200px;
+        }
+
+        /* Stats Badge */
+        .stats-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <h2>
+            <i class="fas fa-list"></i>
+            كل النماذج
+            @if (Model != null && Model.Any())
+            {
+                <span class="stats-badge">
+                    <i class="fas fa-file-alt"></i>
+                    <strong class="ps-4 fs-5">@Model.Count نموذج</strong>
+                </span>
+            }
+        </h2>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="filter-card">
+        <div class="filter-row">
+            <div class="filter-col">
+                <label class="filter-label">رقم الإدارة</label>
+                <input type="number"
+                       id="departmentNo"
+                       class="filter-input"
+                       placeholder="أدخل رقم الإدارة (مثال: 50)" />
+            </div>
+
+            <div class="filter-col-btn">
+                <button type="button"
+                        class="btn-filter"
+                        onclick="filterForms()">
+                    <i class="fas fa-search"></i>
+                    حصر النماذج
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-responsive" id="formsTable">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:10%">الإدارة</th>
+                        <th style="width:20%">رقم النموذج</th>
+                        <th style="width:30%">اسم الإجراء</th>
+                        <th style="width:25%">اسم النموذج</th>
+                        <th style="width:15%">إجراءات</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var x in Model.OrderByDescending(f => f.FormNumber))
+                        {
+                            <tr>
+                                <td class="text-center">
+                                    <span><strong>@x.DepartmentNo</strong></span>
+                                </td>
+
+                                <td class="text-center">
+                                    <span><strong>@x.FullNumber</strong></span>
+                                </td>
+
+                                <td>
+                                    @x.ProcedureName
+                                </td>
+
+                                <td>
+                                    @x.FormName
+                                </td>
+
+                                <td class="text-center">
+                                    <form asp-area="Admin"
+                                          asp-controller="FormsRegister"
+                                          asp-action="Delete"
+                                          method="post"
+                                          onsubmit="return confirmDelete();">
+                                        <input type="hidden" name="id" value="@x.Id" />
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="action-btn btn-delete"
+                                                title="حذف النموذج">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <div class="empty-state-text">لا توجد نماذج مسجلة حتى الآن</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
+
+@section Scripts {
+    <script>
+        // Loading overlay control
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Filter forms function
+        function filterForms() {
+            const deptNo = document.getElementById("departmentNo").value;
+
+            if (!deptNo || deptNo <= 0) {
+                alert("⚠️ الرجاء إدخال رقم إدارة صحيح");
+                return;
+            }
+
+            let url = "/Admin/FormsRegister/Filter";
+            url += `?departmentNo=${deptNo}`;
+
+            showLoading();
+
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Department not found');
+                    }
+                    return res.text();
+                })
+                .then(html => {
+                    const tableContainer = document.getElementById("formsTable");
+                    tableContainer.style.opacity = '0';
+
+                    setTimeout(() => {
+                        tableContainer.innerHTML = html;
+                        tableContainer.style.transition = 'opacity 0.5s ease';
+                        tableContainer.style.opacity = '1';
+                    }, 200);
+
+                    hideLoading();
+                })
+                .catch(() => {
+                    hideLoading();
+                    showNotification("❌ رقم الإدارة غير موجود أو حدث خطأ في التحميل", "error");
+                });
+        }
+
+        // Confirm delete function
+        function confirmDelete() {
+            return confirm('🗑️ هل أنت متأكد من حذف هذا النموذج؟\nلا يمكن التراجع عن هذا الإجراء.');
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${type === 'error' ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' : 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'};
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-weight: 600;
+                animation: slideDown 0.5s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideUp 0.5s ease';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Enter key support for filter input
+        document.getElementById('departmentNo').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                filterForms();
+            }
+        });
+
+        // Table row animation on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.animation = `fadeInUp 0.5s ease ${index * 0.05}s forwards`;
+            });
+        });
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @@keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+            }
+            @@keyframes slideUp {
+                from {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(-20px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+}

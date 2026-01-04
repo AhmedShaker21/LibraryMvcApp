@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace LibraryMvcApp.Controllers.Admin
+namespace LibraryMvcApp.Controllers
 {
     [Authorize(Roles = "Admin")]
     [Route("Admin/FormsRegister")]
@@ -23,12 +23,31 @@ namespace LibraryMvcApp.Controllers.Admin
         }
 
         // =========================
-        // GET: /Admin/FormsRegister?departmentId=1
+        // GET: /Admin/FormsRegister?departmentNo=50
         // =========================
-        public async Task<IActionResult> Index(int departmentNo)
+        [HttpGet("")]
+        public async Task<IActionResult> Index([FromQuery] int departmentNo)
         {
-            ViewBag.DepartmentNo = departmentNo;
+            if (departmentNo <= 0)
+            {
+                return RedirectToAction(
+                    "Index",
+                    "Error",
+                    new { message = "من فضلك اختر رقم إدارة صحيح." });
+            }
 
+            var department = await _context.Departments
+                .FirstOrDefaultAsync(d => d.Code == departmentNo);
+
+            if (department == null)
+            {
+                return RedirectToAction(
+                    "Index",
+                    "Error",
+                    new { message = $"رقم الإدارة ({departmentNo}) غير موجود." });
+            }
+
+            ViewBag.DepartmentNo = departmentNo;
             ViewBag.LastFormNumber =
                 await _service.GetLastFormNumberAsync(departmentNo);
 
@@ -38,41 +57,53 @@ namespace LibraryMvcApp.Controllers.Admin
         }
 
         // =========================
-        // GET: /Admin/FormsRegister/Create
+        // GET: Create
+        // /Admin/FormsRegister/Create?departmentNo=50
         // =========================
         [HttpGet("Create")]
-        public async Task<IActionResult> Create()
+        public IActionResult Create([FromQuery] int departmentNo)
         {
+            if (departmentNo <= 0)
+            {
+                return RedirectToAction(
+                    "Index",
+                    "Error",
+                    new { message = "يجب اختيار إدارة قبل إضافة نموذج." });
+            }
+
             var vm = new CreateFormVm
             {
-                Departments = await _context.Departments
-                    .OrderBy(d => d.Code)
-                    .ToListAsync()
+                DepartmentCode = departmentNo
             };
 
             return View(vm);
         }
 
         // =========================
-        // POST: /Admin/FormsRegister/Create
+        // POST: Create
         // =========================
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateFormVm vm)
         {
             if (!ModelState.IsValid)
-            {
-                vm.Departments = await _context.Departments.ToListAsync();
                 return View(vm);
-            }
 
             var department = await _context.Departments
-                .SingleAsync(d => d.Id == vm.DepartmentId);
+                .FirstOrDefaultAsync(d => d.Code == vm.DepartmentCode);
+
+            if (department == null)
+            {
+                return RedirectToAction(
+                    "Index",
+                    "Error",
+                    new { message = "رقم الإدارة غير موجود." });
+            }
 
             var entry = new FormEntry
             {
-                DepartmentId = department.Id,        // FK
-                DepartmentNo = department.Code,      // 53
+                DepartmentId = department.Id,
+                DepartmentNo = department.Code,
                 ProcedureName = vm.ProcedureName,
                 ProcedureCode = vm.ProcedureCode,
                 FormName = vm.FormName
@@ -80,22 +111,33 @@ namespace LibraryMvcApp.Controllers.Admin
 
             await _service.AddFormAsync(entry);
 
+            //return RedirectToAction(nameof(All));
             return RedirectToAction(
-                nameof(Index),
-                new { departmentNo = department.Code }
-            );
+            nameof(Index),
+            new { departmentNo = department.Code });
         }
 
-
         // =========================
-        // POST: Delete
+        // POST: Delete (من صفحة الإدارة)
         // =========================
         [HttpPost("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, int departmentId)
+        public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeleteAsync(id);
-            return RedirectToAction(nameof(Index), new { departmentId });
+            try
+            {
+                await _service.DeleteAsync(id);
+
+                // نرجّع على صفحة All عشان الجدول يتحدّث
+                return RedirectToAction(nameof(All));
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction(
+                    "Index",
+                    "Error",
+                    new { message = ex.Message });
+            }
         }
 
         // =========================
@@ -107,7 +149,32 @@ namespace LibraryMvcApp.Controllers.Admin
             var list = await _service.GetAllAsync();
             return View(list);
         }
+
+        // =========================
+        // GET: Filter (AJAX)
+        // =========================
+        [HttpGet("Filter")]
+        public async Task<IActionResult> Filter(int? departmentNo)
+        {
+            List<FormEntry> list;
+
+            // لو مفيش رقم → رجّع الكل
+            if (departmentNo == null || departmentNo <= 0)
+            {
+                list = await _service.GetAllAsync();
+            }
+            else
+            {
+                var department = await _context.Departments
+                    .FirstOrDefaultAsync(d => d.Code == departmentNo);
+
+                if (department == null)
+                    return NotFound();
+
+                list = await _service.GetByDepartmentAsync(departmentNo.Value);
+            }
+
+            return PartialView("_FormsTable", list);
+        }
     }
-
-
 }

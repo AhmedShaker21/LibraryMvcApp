@@ -1,4 +1,5 @@
 ﻿using LibraryMvcApp.Services.Interfaces;
+using LibraryMvcApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,23 +23,47 @@ namespace LibraryMvcApp.Controllers
         // 📌 عرض كل الإدارات
         public async Task<IActionResult> Index()
         {
-            var departments = await _context.Departments.ToListAsync();
-
-            var result = new List<dynamic>();
-
-            foreach (var dept in departments)
+            try
             {
-                int lastForm = await _service.GetLastFormNumberAsync(dept.Id);
+                var departments = await _context.Departments
+                    .OrderBy(d => d.Code)
+                    .ToListAsync();
 
-                result.Add(new
+                var result = new List<DepartmentWithLastFormVm>();
+
+                foreach (var dept in departments)
                 {
-                    Department = dept,
-                    LastFormNumber = lastForm
-                });
-            }
+                    int lastForm;
 
-            return View(result);
+                    try
+                    {
+                        // ✅ نستخدم Code مش Id
+                        lastForm = await _service
+                            .GetLastFormNumberAsync(dept.Code);
+                    }
+                    catch
+                    {
+                        // 🔒 في حالة مشكلة في إدارة واحدة
+                        lastForm = dept.StartFormNumber;
+                    }
+
+                    result.Add(new DepartmentWithLastFormVm
+                    {
+                        Department = dept,
+                        LastFormNumber = lastForm
+                    });
+                }
+
+                return View(result);
+            }
+            catch (Exception ex)
+            {
+                // 🔴 أي مشكلة عامة تودّي على Error View
+                return RedirectToAction(
+                    "Index",
+                    "Error",
+                    new { message = ex.Message });
+            }
         }
     }
-
 }
