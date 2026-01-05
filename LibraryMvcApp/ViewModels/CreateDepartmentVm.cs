@@ -5,7 +5,7 @@ namespace LibraryMvcApp.ViewModels
     public class CreateDepartmentVm
     {
         [Required(ErrorMessage = "اسم الإدارة مطلوب")]
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
 
         [Required(ErrorMessage = "رقم الإدارة مطلوب")]
         [Range(1, 9999)]

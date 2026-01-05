@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div style="max-width:700px;margin:60px auto;text-align:center;">
+    <h1 style="color:#d9534f;">🚫 غير مسموح</h1>
+    <p style="font-size:18px;">
+        @TempData["ErrorMessage"] ?? "ليس لديك صلاحية لتنفيذ هذا الإجراء."
+    </p>
+    <a class="btn btn-primary" asp-controller="Home" asp-action="Index">العودة للرئيسية</a>
+</div>

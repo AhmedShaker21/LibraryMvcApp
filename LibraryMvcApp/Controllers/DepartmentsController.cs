@@ -1,4 +1,5 @@
-﻿using LibraryMvcApp.Services.Interfaces;
+﻿using LibraryMvcApp.Models;
+using LibraryMvcApp.Services.Interfaces;
 using LibraryMvcApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,5 +66,72 @@ namespace LibraryMvcApp.Controllers
                     new { message = ex.Message });
             }
         }
+
+
+
+        // =========================
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // =========================
+        // POST: Departments/Create
+        // =========================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateDepartmentVm vm)
+        {
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            // منع تكرار رقم الإدارة
+            bool codeExists = await _context.Departments
+                .AnyAsync(d => d.Code == vm.Code);
+
+            if (codeExists)
+            {
+                ModelState.AddModelError("Code", "رقم الإدارة موجود بالفعل");
+                return View(vm);
+            }
+
+            var department = new Department
+            {
+                Name = vm.Name,                
+                Code = vm.Code,
+                StartFormNumber = vm.StartFormNumber
+            };
+
+            _context.Departments.Add(department);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var department = await _context.Departments
+                .Include(d => d.FormEntries)
+                .FirstOrDefaultAsync(d => d.Id == id);
+
+            if (department == null)
+                return NotFound();
+
+            if (department.FormEntries.Any())
+            {
+                TempData["Error"] = "لا يمكن حذف الإدارة لأنها تحتوي على نماذج";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.Departments.Remove(department);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "تم حذف الإدارة بنجاح";
+            return RedirectToAction(nameof(Index));
+        }
+
     }
+
 }

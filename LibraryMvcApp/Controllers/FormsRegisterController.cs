@@ -176,5 +176,20 @@ namespace LibraryMvcApp.Controllers
 
             return PartialView("_FormsTable", list);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateReview(int id, int review)
+        {
+            var form = await _context.FormEntries.FindAsync(id);
+
+            if (form == null)
+                return NotFound();
+
+            form.Review = review;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(All));
+        }
+
     }
 }

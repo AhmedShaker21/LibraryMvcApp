@@ -66,10 +66,14 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
     public DbSet<Folder> Folders { get; set; }
     public DbSet<FormEntry> FormEntries { get; set; }
     public DbSet<Department> Departments { get; set; }
+    public DbSet<UserDepartment> UserDepartments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<UserDepartment>()
+    .HasIndex(x => x.UserId)
+    .IsUnique();
 
         // =========================
         // Departments

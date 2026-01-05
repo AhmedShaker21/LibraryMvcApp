@@ -34,6 +34,7 @@ namespace LibraryMvcApp.Models
         public string FullNumber { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public int Review { get; set; } = 0;
     }
 
 

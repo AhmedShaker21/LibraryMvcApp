@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LibraryMvcApp.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialBaseline : Migration
+    public partial class Review : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -199,15 +199,15 @@ namespace LibraryMvcApp.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DepartmentNo = table.Column<int>(type: "int", nullable: false),
-                    SerialNo = table.Column<int>(type: "int", nullable: false),
-                    FormNumber = table.Column<int>(type: "int", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    FullNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ProcedureName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    ProcedureCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    FormName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DepartmentNo = table.Column<int>(type: "int", nullable: false),
+                    ProcedureName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProcedureCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FormName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FormNumber = table.Column<int>(type: "int", nullable: false),
+                    FullNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Review = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -251,7 +251,27 @@ namespace LibraryMvcApp.Migrations
                 values: new object[,]
                 {
                     { 1, 53, "إدارة الجودة", 200 },
-                    { 2, 50, "إدارة السلامة", 200 }
+                    { 2, 50, "إدارة السلامة", 200 },
+                    { 3, 73, "تأهيل وتدريب العاملين", 200 },
+                    { 4, 74, "الإدارة الطبية", 200 },
+                    { 5, 81, "إدارة المشتريات", 200 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "FormEntries",
+                columns: new[] { "Id", "CreatedAt", "DepartmentId", "DepartmentNo", "FormName", "FormNumber", "FullNumber", "ProcedureCode", "ProcedureName", "Review" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 53, "خريطة تحليل الأنشطة والعمليات", 230, "ن / 53 / 230", "ACFE/HS P 53-01", "تحديد وتقييم مظاهر التأثير البيئي والسلامة", 0 },
+                    { 2, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 53, "جدول الحصر العام لمصادر التأثير البيئى", 231, "ن / 53 / 231", "ACFE/HS P 53-01", "تحديد وتقييم مظاهر التأثير البيئي والسلامة", 0 },
+                    { 3, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 53, "جدول تقييم العناصر البيئية", 232, "ن / 53 / 232", "ACFE/HS P 53-01", "تحديد وتقييم مظاهر التأثير البيئي والسلامة", 0 },
+                    { 4, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 53, "جدول الحصر العام للمصادر الهامة", 233, "ن / 53 / 233", "ACFE/HS P 53-01", "تحديد وتقييم مظاهر التأثير البيئي والسلامة", 0 },
+                    { 5, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, 53, "تحديد مخاطر العمل بالموقع", 240, "ن / 53 / 240", "ACFE/HSP-53-06", "أسلوب مواجهة حالات الطوارئ", 0 },
+                    { 20, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 3, 73, "حصر أسماء العاملين فى العمليات الخاصة", 239, "ن / 73 / 239", "ACFQ/E/HS P 73-02", "تأهيل وتدريب العاملين بالعمليات الخاصة", 0 },
+                    { 30, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, 74, "طلب توقيع كشف طبى", 200, "ن / 74 / 200", "ACFQ/E/HSP 74-01", "الإدارة الطبية", 0 },
+                    { 31, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 4, 74, "نموذج تحويل للمستشفى", 201, "ن / 74 / 201", "ACFQ/E/HSP 74-01", "الإدارة الطبية", 0 },
+                    { 40, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 5, 81, "طلب الشراء", 254, "ن / 81 / 254", "ACFQP 81-02", "إجراء عمليات الشراء", 0 },
+                    { 41, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 5, 81, "سجل الموردين المعتمدين", 242, "ن / 81 / 242", "ACFQP 81-03", "تقييم الموردين", 0 }
                 });
 
             migrationBuilder.CreateIndex(

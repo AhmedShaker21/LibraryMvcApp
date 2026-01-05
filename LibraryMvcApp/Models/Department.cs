@@ -6,9 +6,7 @@
 
         // رقم الإدارة (53 – 50 …)
         public int Code { get; set; }
-
-        public string Name { get; set; } = null!;
-
+        public string Name { get; set; } = string.Empty;
         // رقم البداية للنماذج
         public int StartFormNumber { get; set; }
 

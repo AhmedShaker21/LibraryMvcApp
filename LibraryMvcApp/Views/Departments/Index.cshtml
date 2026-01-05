@@ -375,6 +375,41 @@
                 transform: translateX(0);
             }
         }
+        .add-dept-btn {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #fff !important;
+            padding: 0.6rem 1.2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none !important; /* يشيل الخط */
+            box-shadow: 0 4px 12px rgba(56, 239, 125, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.3s ease;
+        }
+        .header-flex {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* ⭐ المطلوب */
+            gap: 1rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+            .add-dept-btn:hover {
+                background: linear-gradient(135deg, #0f8a7a 0%, #2edc6f 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 18px rgba(56, 239, 125, 0.6);
+                text-decoration: none; /* تأكيد */
+            }
+
+            .add-dept-btn:active {
+                transform: translateY(0);
+            }
 
         /* Hover Glow Effect */
         .action-btn:hover {
@@ -398,7 +433,7 @@
 <body>
 
     <!-- Page Header -->
-    <div class="page-header">
+    <div class="page-header header-flex">
         <h2>
             <i class="fas fa-building"></i>
             الإدارات
@@ -410,7 +445,16 @@
                 </span>
             }
         </h2>
+
+        <div class="header-actions">
+            <a asp-controller="Departments"
+               asp-action="Create"
+               class="stats-badge add-dept-btn">
+                ➕ إضافة إدارة
+            </a>
+        </div>
     </div>
+
 
     <!-- Table Card -->
     <div class="table-card">
@@ -421,6 +465,7 @@
                         <th class="col-dept">رقم الإدارة</th>
                         <th class="col-form">آخر رقم نموذج</th>
                         <th class="col-actions">إجراءات</th>
+                        <th class="col-actions">حذف الادارة</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -450,6 +495,19 @@
                                             <i class="fas fa-eye"></i>
                                             <span>عرض النماذج</span>
                                         </a>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="action-group">
+                                <form asp-action="Delete"
+                                      method="post"
+                                      onsubmit="return confirm('هل أنت متأكد من حذف هذه الإدارة؟');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.Department.Id" />
+                                    <button class="btn btn-danger btn-sm">
+                                        🗑 حذف
+                                    </button>
+                                </form>
                                     </div>
                                 </td>
                             </tr>
@@ -538,7 +596,7 @@
 
                 let current = 0;
                 const target = parseInt(originalText) || 0;
-                const duration = 1000;
+                const duration = 1500;
                 const step = target / (duration / 16);
 
                 const animate = () => {
