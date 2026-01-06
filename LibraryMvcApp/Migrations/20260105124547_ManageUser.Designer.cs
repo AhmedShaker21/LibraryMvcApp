@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryMvcApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260105124547_ManageUser")]
+    partial class ManageUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,7 +212,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 53 / 230",
                             ProcedureCode = "ACFE/HS P 53-01",
                             ProcedureName = "تحديد وتقييم مظاهر التأثير البيئي والسلامة",
-                            Review = 1
+                            Review = 0
                         },
                         new
                         {
@@ -222,7 +225,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 53 / 231",
                             ProcedureCode = "ACFE/HS P 53-01",
                             ProcedureName = "تحديد وتقييم مظاهر التأثير البيئي والسلامة",
-                            Review = 1
+                            Review = 0
                         },
                         new
                         {
@@ -235,7 +238,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 53 / 232",
                             ProcedureCode = "ACFE/HS P 53-01",
                             ProcedureName = "تحديد وتقييم مظاهر التأثير البيئي والسلامة",
-                            Review = 1
+                            Review = 0
                         },
                         new
                         {
@@ -248,7 +251,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 53 / 233",
                             ProcedureCode = "ACFE/HS P 53-01",
                             ProcedureName = "تحديد وتقييم مظاهر التأثير البيئي والسلامة",
-                            Review = 1
+                            Review = 0
                         },
                         new
                         {
@@ -261,7 +264,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 53 / 240",
                             ProcedureCode = "ACFE/HSP-53-06",
                             ProcedureName = "أسلوب مواجهة حالات الطوارئ",
-                            Review = 1
+                            Review = 0
                         },
                         new
                         {
@@ -274,7 +277,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 73 / 239",
                             ProcedureCode = "ACFQ/E/HS P 73-02",
                             ProcedureName = "تأهيل وتدريب العاملين بالعمليات الخاصة",
-                            Review = 1
+                            Review = 0
                         },
                         new
                         {
@@ -287,7 +290,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 74 / 200",
                             ProcedureCode = "ACFQ/E/HSP 74-01",
                             ProcedureName = "الإدارة الطبية",
-                            Review = 1
+                            Review = 0
                         },
                         new
                         {
@@ -300,7 +303,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 74 / 201",
                             ProcedureCode = "ACFQ/E/HSP 74-01",
                             ProcedureName = "الإدارة الطبية",
-                            Review = 1
+                            Review = 0
                         },
                         new
                         {
@@ -313,7 +316,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 81 / 254",
                             ProcedureCode = "ACFQP 81-02",
                             ProcedureName = "إجراء عمليات الشراء",
-                            Review = 1
+                            Review = 0
                         },
                         new
                         {
@@ -326,7 +329,7 @@ namespace LibraryMvcApp.Migrations
                             FullNumber = "ن / 81 / 242",
                             ProcedureCode = "ACFQP 81-03",
                             ProcedureName = "تقييم الموردين",
-                            Review = 1
+                            Review = 0
                         });
                 });
 
