@@ -16,7 +16,7 @@ body {
     color: #1a237e;
 }
 
-/* Navbar */
+
 .navbar-dark {
     background: var(--dark-gradient) !important;
     box-shadow: var(--shadow-md);
@@ -100,7 +100,7 @@ body {
         transform: scale(1.05);
     }
 
-/* Buttons */
+
 .btn {
     border: none;
     border-radius: 8px;
@@ -131,7 +131,7 @@ body {
     background: linear-gradient(135deg, #90A4AE 0%, #607D8B 100%);
 }
 
-/* Tables */
+
 .table-container {
     background: white;
     border-radius: 16px;

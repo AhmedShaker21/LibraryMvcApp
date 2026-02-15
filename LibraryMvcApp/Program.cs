@@ -48,6 +48,13 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 
+app.UseExceptionHandler("/Error");
+
+app.UseStatusCodePagesWithReExecute(
+    "/Error",
+    "?message=الصفحة غير موجودة"
+);
+
 app.UseStaticFiles();
 
 app.UseRouting();

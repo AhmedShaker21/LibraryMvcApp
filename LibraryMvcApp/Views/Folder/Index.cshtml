@@ -34,7 +34,7 @@
 
         @if (ViewBag.Breadcrumb != null && ViewBag.Breadcrumb.Count > 0)
         {
-            <a asp-controller="Folder" asp-action="Index">Root</a>
+            <a asp-controller="Folder" asp-action="Index" asp-route-id="">Root</a>
 
             foreach (var f in ViewBag.Breadcrumb)
             {
@@ -129,13 +129,23 @@
                         @if (canManageFolder)
                         {
                             <div class="d-flex gap-1">
+                                <form asp-controller="Folder"
+                                      asp-action="Rename"
+                                      method="post"
+                                      class="d-inline">
 
-                                <a asp-controller="Folder"
-                                   asp-action="Edit"
-                                   asp-route-id="@folder.Id"
-                                   class="btn btn-secondary btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden" name="id" value="@folder.Id" />
+                                    <input type="hidden" name="newName" value="@folder.Name" />
+
+                                    <button type="button"
+                                            class="btn btn-secondary btn-sm"
+                                            onclick="renameFolder(this)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </form>
+
 
                                 <form asp-controller="Folder"
                                       asp-action="Delete"
@@ -228,7 +238,22 @@
     const searchBox = document.getElementById("searchBox");
     const resultDiv = document.getElementById("searchResult");
     let timer = null;
+        function renameFolder(button) {
+        const form = button.closest('form');
+        const input = form.querySelector('input[name="newName"]');
 
+        const newName = prompt("اكتب الاسم الجديد:", input.value);
+
+        if (newName === null) return; // Cancel
+
+        if (newName.trim() === "") {
+            alert("الاسم لا يمكن أن يكون فارغ");
+            return;
+        }
+
+        input.value = newName.trim();
+        form.submit();
+    }
     searchBox.addEventListener("keyup", function () {
         clearTimeout(timer);
 

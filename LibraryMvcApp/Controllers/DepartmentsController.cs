@@ -26,57 +26,10 @@ namespace LibraryMvcApp.Controllers
             _userManager = userManager;
         }
 
-        // 📌 عرض كل الإدارات
-        //public async Task<IActionResult> Index()
-        //{
-        //    try
-        //    {
-        //        var departments = await _context.Departments
-        //            .OrderBy(d => d.Code)
-        //            .ToListAsync();
-
-        //        var result = new List<DepartmentWithLastFormVm>();
-
-        //        foreach (var dept in departments)
-        //        {
-        //            int lastForm;
-
-        //            try
-        //            {
-        //                // ✅ نستخدم Code مش Id
-        //                lastForm = await _service
-        //                    .GetLastFormNumberAsync(dept.Code);
-        //            }
-        //            catch
-        //            {
-        //                // 🔒 في حالة مشكلة في إدارة واحدة
-        //                lastForm = dept.StartFormNumber;
-        //            }
-
-        //            result.Add(new DepartmentWithLastFormVm
-        //            {
-        //                Department = dept,
-        //                LastFormNumber = lastForm
-        //            });
-        //        }
-
-        //        return View(result);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // 🔴 أي مشكلة عامة تودّي على Error View
-        //        return RedirectToAction(
-        //            "Index",
-        //            "Error",
-        //            new { message = ex.Message });
-        //    }
-        //}
-
         public async Task<IActionResult> Index()
         {
             List<DepartmentWithLastFormVm> result;
 
-            // 👑 Admin → يشوف الكل
             if (User.IsInRole("Admin"))
             {
                 result = await _context.Departments
@@ -91,8 +44,6 @@ namespace LibraryMvcApp.Controllers
 
                 return View(result);
             }
-
-            // 👤 User عادي → يشوف إدارته بس
             var userId = _userManager.GetUserId(User);
 
             var userDepartmentId = await _context.UserDepartments

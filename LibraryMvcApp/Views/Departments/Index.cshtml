@@ -613,12 +613,10 @@
             });
         });
 
-        // Keyboard navigation
         document.addEventListener('keydown', function(e) {
             const rows = Array.from(document.querySelectorAll('tbody tr'));
             const activeElement = document.activeElement;
 
-            // Arrow key navigation
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                 e.preventDefault();
                 const currentRow = activeElement.closest('tr');

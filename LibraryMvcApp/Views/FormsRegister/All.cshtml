@@ -177,7 +177,6 @@
                 transform: scale(1.2) rotate(90deg);
             }
 
-        /* Table Card */
         .table-card {
             background: white;
             border-radius: 20px;
@@ -276,7 +275,6 @@
             font-weight: 600;
         }
 
-        /* Action Buttons */
         .action-btn {
             padding: 0.5rem 1rem;
             border: none;
@@ -318,7 +316,6 @@
             font-size: 1rem;
         }
 
-        /* Loading State */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -355,7 +352,6 @@
             }
         }
 
-        /* Responsive */
         @@media (max-width: 768px) {
             .page-header h2 {
                 font-size: 1.8rem;
@@ -383,7 +379,6 @@
             }
         }
 
-        /* Form inline */
         form {
             display: inline;
         }
@@ -404,7 +399,6 @@
             min-width: 200px;
         }
 
-        /* Stats Badge */
         .stats-badge {
             background: rgba(255, 255, 255, 0.2);
             color: white;
@@ -419,12 +413,10 @@
 </head>
 <body>
 
-    <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
     </div>
 
-    <!-- Page Header -->
     <div class="page-header">
         <h2>
             <i class="fas fa-list"></i>
@@ -439,7 +431,6 @@
         </h2>
     </div>
 
-    <!-- Filter Card -->
     <div class="filter-card">
         <div class="filter-row">
             <div class="filter-col">
@@ -461,7 +452,6 @@
         </div>
     </div>
 
-    <!-- Table Card -->
     <div class="table-card">
         <div class="table-responsive" id="formsTable">
             <table>
@@ -471,7 +461,7 @@
                         <th style="width:20%">رقم النموذج</th>
                         <th style="width:20%">اسم الإجراء</th>
                         <th style="width:25%">اسم النموذج</th>
-                        <th style="width:15%">إجراءات</th>
+                        <th style="width:15%">حذف النموذج</th>
                         <th style="width: 10%">المراجعة</th>
                     </tr>
                 </thead>
@@ -638,14 +628,12 @@
             }, 3000);
         }
 
-        // Enter key support for filter input
         document.getElementById('departmentNo').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 filterForms();
             }
         });
 
-        // Table row animation on load
         document.addEventListener('DOMContentLoaded', function() {
             const rows = document.querySelectorAll('tbody tr');
             rows.forEach((row, index) => {
@@ -653,8 +641,6 @@
                 row.style.animation = `fadeInUp 0.5s ease ${index * 0.05}s forwards`;
             });
         });
-
-        // Add CSS animations
         const style = document.createElement('style');
         style.textContent = `
             @@keyframes slideDown {

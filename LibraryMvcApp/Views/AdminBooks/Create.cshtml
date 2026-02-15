@@ -1,6 +1,7 @@
 ﻿@{
     ViewBag.Title = "Add New Book";
 }
+
 <div class="page-header">
     <h2><i class="fas fa-plus-circle me-2"></i>Add New Book</h2>
 </div>
@@ -9,53 +10,81 @@
     <form asp-action="Create" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
 
-        <!-- مهم جداً: عشان الكتاب يتحفظ جوه الفولدر الحالي -->
         <input type="hidden" name="folderId" value="@ViewBag.FolderId" />
 
-        <!-- Title -->
         <div class="mb-4">
-            <label class="form-label"><i class="fas fa-heading me-2"></i>Title</label>
+            <label class="form-label">
+                <i class="fas fa-heading me-2"></i>Title
+            </label>
             <input name="title" class="form-control" placeholder="Enter book title" required />
         </div>
 
-        <!-- Author -->
         <div class="mb-4">
-            <label class="form-label"><i class="fas fa-user-edit me-2"></i>Author</label>
+            <label class="form-label">
+                <i class="fas fa-user-edit me-2"></i>Author
+            </label>
             <input name="author" class="form-control" placeholder="Enter author name" required />
         </div>
 
-        <!-- Description -->
         <div class="mb-4">
-            <label class="form-label"><i class="fas fa-align-left me-2"></i>Description</label>
-            <textarea name="description" class="form-control" placeholder="Enter book description"></textarea>
+            <label class="form-label">
+                <i class="fas fa-align-left me-2"></i>Description
+            </label>
+            <textarea name="description"
+                      class="form-control"
+                      placeholder="Enter book description"></textarea>
         </div>
 
-        <!-- Drag & Drop: Book File -->
+        <!-- ===================== -->
+        <!-- 📚 MULTI BOOK UPLOAD -->
+        <!-- ===================== -->
         <div class="mb-4">
-            <label class="form-label"><i class="fas fa-file-upload me-2"></i>Book File</label>
+            <label class="form-label">
+                <i class="fas fa-file-upload me-2"></i>Book Files
+            </label>
 
             <div class="drop-zone" id="bookDropZone">
-                <p><i class="fas fa-file me-2"></i>Drag & Drop the book file here</p>
-                <p style="font-size: 13px; color: #999;">or click to select</p>
+                <p>
+                    <i class="fas fa-file me-2"></i>
+                    Drag & Drop book files here
+                </p>
+                <p style="font-size: 13px; color: #999;">
+                    or click to select (multiple allowed)
+                </p>
             </div>
 
-            <!-- الـ input الحقيقي اللي هيتم إرساله في الفورم -->
-            <input type="file" name="file" id="bookFileInput" class="form-control d-none" required />
+            <input type="file"
+                   name="files"
+                   id="bookFileInput"
+                   class="form-control d-none"
+                   multiple
+                   required />
         </div>
 
-        <!-- Drag & Drop: Cover Image -->
+        <!-- ===================== -->
+        <!-- 🖼 COVER IMAGE -->
+        <!-- ===================== -->
         <div class="mb-4">
-            <label class="form-label"><i class="fas fa-image me-2"></i>Cover Image (optional)</label>
+            <label class="form-label">
+                <i class="fas fa-image me-2"></i>Cover Image (optional)
+            </label>
 
             <div class="drop-zone" id="coverDropZone">
-                <p><i class="fas fa-image me-2"></i>Drag & Drop the cover image here</p>
-                <p style="font-size: 13px; color: #999;">or click to select</p>
+                <p>
+                    <i class="fas fa-image me-2"></i>
+                    Drag & Drop the cover image here
+                </p>
+                <p style="font-size: 13px; color: #999;">
+                    or click to select
+                </p>
             </div>
 
-            <input type="file" name="coverImage" id="coverFileInput" class="form-control d-none" />
+            <input type="file"
+                   name="coverImage"
+                   id="coverFileInput"
+                   class="form-control d-none" />
         </div>
 
-        <!-- Buttons -->
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-success">
                 <i class="fas fa-save me-2"></i>Save
@@ -70,7 +99,6 @@
     </form>
 </div>
 
-<!-- ========== Drag & Drop Styles ========== -->
 <style>
     .drop-zone {
         border: 2px dashed #888;
@@ -88,22 +116,23 @@
         }
 
         .drop-zone p {
-            margin: 0;
+            margin: 4px 0;
             color: #555;
             font-size: 15px;
         }
 </style>
 
-<!-- ========== Drag & Drop Script ========== -->
 <script>
-    // ===== Book file drag & drop =====
+    // ===============================
+    // 📚 BOOK FILES (MULTI)
+    // ===============================
     const bookDropZone = document.getElementById("bookDropZone");
     const bookFileInput = document.getElementById("bookFileInput");
 
     bookDropZone.addEventListener("click", () => bookFileInput.click());
 
-    bookDropZone.addEventListener("dragover", (event) => {
-        event.preventDefault();
+    bookDropZone.addEventListener("dragover", e => {
+        e.preventDefault();
         bookDropZone.classList.add("dragover");
     });
 
@@ -111,29 +140,44 @@
         bookDropZone.classList.remove("dragover");
     });
 
-    bookDropZone.addEventListener("drop", (event) => {
-        event.preventDefault();
+    bookDropZone.addEventListener("drop", e => {
+        e.preventDefault();
         bookDropZone.classList.remove("dragover");
 
-        if (event.dataTransfer.files.length > 0) {
-            bookFileInput.files = event.dataTransfer.files;
-
-            const file = event.dataTransfer.files[0];
-            bookDropZone.innerHTML = `
-                <p><strong>${file.name}</strong></p>
-                <p style="font-size: 13px; color: #999;">File selected</p>
-            `;
+        if (e.dataTransfer.files.length > 0) {
+            bookFileInput.files = e.dataTransfer.files;
+            renderBookFiles(e.dataTransfer.files);
         }
     });
 
-    // ===== Cover image drag & drop =====
+    bookFileInput.addEventListener("change", () => {
+        renderBookFiles(bookFileInput.files);
+    });
+
+    function renderBookFiles(files) {
+        let html = "";
+        for (let i = 0; i < files.length; i++) {
+            html += `<p><strong>${files[i].name}</strong></p>`;
+        }
+
+        bookDropZone.innerHTML = `
+            ${html}
+            <p style="font-size:13px;color:#999">
+                ${files.length} file(s) selected
+            </p>
+        `;
+    }
+
+    // ===============================
+    // 🖼 COVER IMAGE
+    // ===============================
     const coverDropZone = document.getElementById("coverDropZone");
     const coverFileInput = document.getElementById("coverFileInput");
 
     coverDropZone.addEventListener("click", () => coverFileInput.click());
 
-    coverDropZone.addEventListener("dragover", (event) => {
-        event.preventDefault();
+    coverDropZone.addEventListener("dragover", e => {
+        e.preventDefault();
         coverDropZone.classList.add("dragover");
     });
 
@@ -141,17 +185,17 @@
         coverDropZone.classList.remove("dragover");
     });
 
-    coverDropZone.addEventListener("drop", (event) => {
-        event.preventDefault();
+    coverDropZone.addEventListener("drop", e => {
+        e.preventDefault();
         coverDropZone.classList.remove("dragover");
 
-        if (event.dataTransfer.files.length > 0) {
-            coverFileInput.files = event.dataTransfer.files;
+        if (e.dataTransfer.files.length > 0) {
+            coverFileInput.files = e.dataTransfer.files;
 
-            const file = event.dataTransfer.files[0];
+            const file = e.dataTransfer.files[0];
             coverDropZone.innerHTML = `
                 <p><strong>${file.name}</strong></p>
-                <p style="font-size: 13px; color: #999;">Cover selected</p>
+                <p style="font-size:13px;color:#999">Cover selected</p>
             `;
         }
     });

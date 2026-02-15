@@ -47,7 +47,6 @@ namespace LibraryMvcApp.Services.Implementations
             }
             catch
             {
-                // ❗ OCR فشل → نكمل من غيره
                 return new List<int>();
             }
 

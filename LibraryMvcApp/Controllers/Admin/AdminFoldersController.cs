@@ -51,7 +51,14 @@ namespace LibraryMvcApp.Controllers.Admin
                     .FirstOrDefaultAsync(f => f.Id == id.Value);
 
                 if (folder == null)
-                    return NotFound();
+{
+    return RedirectToAction(
+        "Index",
+        "Error",
+        new { message = "الفولدر غير موجود" }
+    );
+}
+
 
                 ViewBag.Breadcrumb = await GetBreadcrumbPath(id.Value);
             }
@@ -94,7 +101,7 @@ namespace LibraryMvcApp.Controllers.Admin
         // =======================================================
         // 📌 Rename Folder
         // =======================================================
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Rename(int id, string newName)
@@ -106,6 +113,14 @@ namespace LibraryMvcApp.Controllers.Admin
             if (folder == null)
                 return NotFound();
 
+            bool canManageFolder =
+                User.IsInRole("Admin") ||
+                (!string.IsNullOrEmpty(folder.AllowedRole) &&
+                 User.IsInRole(folder.AllowedRole));
+
+            if (!canManageFolder)
+                return Forbid(); // أو Unauthorized()
+
             folder.Name = newName.Trim();
             await _context.SaveChangesAsync();
 
@@ -113,9 +128,9 @@ namespace LibraryMvcApp.Controllers.Admin
         }
 
         // =======================================================
-        // 📌 Delete Folder (Recursive)
+        //  Delete Folder (Recursive)
         // =======================================================
-        [Authorize(Roles = "Admin")]
+        [Authorize] // أي يوزر مسجل دخول
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -128,6 +143,14 @@ namespace LibraryMvcApp.Controllers.Admin
             if (folder == null)
                 return NotFound();
 
+            bool canManageFolder =
+                User.IsInRole("Admin") ||
+                (!string.IsNullOrEmpty(folder.AllowedRole) &&
+                 User.IsInRole(folder.AllowedRole));
+
+            if (!canManageFolder)
+                return Forbid(); // أو Unauthorized()
+
             int? parentId = folder.ParentFolderId;
 
             await DeleteRecursive(folder);
@@ -135,6 +158,7 @@ namespace LibraryMvcApp.Controllers.Admin
 
             return RedirectToAction(nameof(Index), new { id = parentId });
         }
+
 
         // =======================================================
         // 📌 Recursive Delete Helper

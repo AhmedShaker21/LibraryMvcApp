@@ -22,6 +22,7 @@ namespace LibraryMvcApp.ViewModels
         public string FormName { get; set; }
 
         public List<Department>? Departments { get; set; }
+        public int FormNumber { get; set; }
 
         public int LastFormNumber { get; set; }
     }

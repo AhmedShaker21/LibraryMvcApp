@@ -444,9 +444,8 @@
                         <th style="width: 20%">رقم النموذج</th>
                         <th style="width: 20%">اسم الإجراء</th>
                         <th style="width: 20%">اسم النموذج</th>
-                        <th style="width: 10%">إجراءات</th>
-                        <th style="width: 10%">حذف النموذج</th>
-                        <th style="width: 10%">عدد المراجعات</th>
+                        <th style="width: 15%">حذف النموذج</th>
+                        <th style="width: 15%">عدد المراجعات</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -463,7 +462,10 @@
                                 <td class="text-center">
                                     <span class="form-number-cell">@x.FullNumber</span>
                                 </td>
-                                <td>@x.ProcedureName</td>
+
+                                <td>
+                                    @x.ProcedureName
+                                </td>
                                 <td>@x.FormName</td>
                                 <td class="text-center">
                                     <form asp-area="Admin"

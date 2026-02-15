@@ -7,10 +7,10 @@ namespace LibraryMvcApp.Models
     {
         public int Id { get; set; }
 
-        public int DepartmentId { get; set; }   // FK
+        public int DepartmentId { get; set; }  
         public Department Department { get; set; }
 
-        public int DepartmentNo { get; set; }   // للعرض فقط
+        public int DepartmentNo { get; set; }  
 
         public string ProcedureName { get; set; }
         public string ProcedureCode { get; set; }
